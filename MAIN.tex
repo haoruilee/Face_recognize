@@ -289,6 +289,7 @@ We can name it Haorui-ResNet. In the next section I will train these two models 
 \section{Training and preferences}
 After design the model, I begin the training step. Tried different epoch, batch size, learning rate and models.
 
+\subsection{Check GPU Memory}
 The options of batch size are often limited by GPU memory.
 
 On my machine, I have a  single Tesla-P-100 with 16280 MiB memory, which means I have more choice on batch size and epochs. 
@@ -301,6 +302,48 @@ Use '!nvidia-smi' I get the following in formations of GPU memeory, it shows tha
   \includegraphics[width=\columnwidth]{IMG/ML实验GPU.png} %插入图片，[]中设置图片大小，{}中是图片文件名
   \label{Fig.RNN} %用于文内引用的标签
 \end{figure}
+\subsection{Should I use Adam?}
+Optimizer plays an important role in deep-learning, and different optimizer can have totally performance.
+
+As we all know, Adam is refereed as an excellent optimizer, but should I use it too in my work? So I test another theoretically-good optimizer which is called RMS-prop, and the results in Tensorborad-X are as follows:
+\begin{figure}[H]%H为当前位置，!htb为忽略美学标准，htbp为浮动图形
+  \centering
+  \caption{Trainning loss of RMS in TensorboradX}
+%可选参数中width=\columnwidth选取了当前列宽
+  \includegraphics[width=40ex]{IMG/loss_RMSprop.png} %插入图片，[]中设置图片大小，{}中是图片文件名
+  \label{Fig.RNN} %用于文内引用的标签
+\end{figure}
+It shows that the loss of RMS optimizer finally  convergences at about 4.5, and in the preliminary stage it really decreased fast.
+
+But with the same epochs and batch-size, which is 32 and 128, the Adam optimizer performs really better:
+
+\begin{figure}[H]%H为当前位置，!htb为忽略美学标准，htbp为浮动图形
+  \centering
+  \caption{Trainning loss of Adam in TensorboradX}
+%可选参数中width=\columnwidth选取了当前列宽
+  \includegraphics[width=40ex]{IMG/loss_Adam.png} %插入图片，[]中设置图片大小，{}中是图片文件名
+  \label{Fig.RNN} %用于文内引用的标签
+\end{figure}
+It shows that the loss of Adam optimizer finally  convergences at about 0.2, even though in the preliminary stage it decrease slower than RMS but finally it convergences at a better point. 
+
+I also test the FPS of training and testing, but it shows that this two optimizer are almost the same:
+\begin{figure}[htbp]
+\centering
+\begin{minipage}[t]{0.48\textwidth}
+\centering
+\includegraphics[width=6cm]{IMG/RMS_FPS.png}
+\caption{FPS of RMS}
+\end{minipage}
+\begin{minipage}[t]{0.48\textwidth}
+\centering
+\includegraphics[width=6cm]{IMG/FPS.png}
+\caption{FPS of Adam}
+\end{minipage}
+\end{figure}
+
+
+As its shown above, Adam optimizer performs better and I will use it in trainning my model.
+\subsection{Epochs and batch-size}
 After choose several combinations of epochs and batch size,  I get the results as follows on Inception-ResNet:
 
 \begin{table}[!htbp]
