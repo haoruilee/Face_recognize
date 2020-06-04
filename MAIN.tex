@@ -393,8 +393,24 @@ So I'm proud to announce that Haorui-Net becomes the winner in this combination,
 
 But what I want to point out is that, Haorui-Net is weaker in the decrease of loss, for ResNet, the minimum of loss is about 0.27 while training, but for Haorui-Net, the minimum loss is about 3.8, it probably means ResNet is designed more smarter in track and reduce the loss.
 
-\section{Conclusion}
-
+\section{Test and Conclusion}
+Because in the training stage I use Face.LVe to process face images, now when test, using this tool will be slow, so I turn to MTCNN and by change its parameters it seldom detect wrong images.
+\begin{lstlisting}[language=Python, caption=MTCNN Parameter]
+mtcnn = MTCNN(image_size=160, 
+        margin=0,
+        min_face_size=60,
+        thresholds=[0.6,0.7,0.7],
+        factor=0.709,post_process=True,device=device)
+\end{lstlisting}
+And the test of Face-Recognize shows:
+\begin{figure}[H]%H为当前位置，!htb为忽略美学标准，htbp为浮动图形
+  \centering
+  \caption{Face Recognize Test}
+%可选参数中width=\columnwidth选取了当前列宽
+  \includegraphics[width=50ex]{IMG/人脸识别测试.png} %插入图片，[]中设置图片大小，{}中是图片文件名
+  \label{Fig.RNN} %用于文内引用的标签
+\end{figure}
+It takes about 0.3653 second per student for face recognize and the accuracy is 78.8$\%$ for the best model of "Haorui Net", not so bad.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
