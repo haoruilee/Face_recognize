@@ -134,7 +134,7 @@ Though MTCNN is very fast, but it sometimes go wrong and bring in dirty data, li
   \includegraphics[width=\columnwidth]{IMG/ML大作业筛选展示.png} %插入图片，[]中设置图片大小，{}中是图片文件名
   \label{Fig.RNN} %用于文内引用的标签
 \end{figure}
-So I refer to \textit{face.evoLVe's face-align tools} and finally get good data.
+So I turn to \textit{face.evoLVe's face-align tools} and finally get good data.
 This tool can be find at:
 \begin{center}
   \url{https://github.com/ZhaoJ9014/face.evoLVe.PyTorch}
@@ -382,14 +382,14 @@ With the chart above, I can qiuckly choose some combinations for Haorui-Net, and
 Epochs & Batch size& TP &Train FPS\\
 \midrule
 24 & 128 & 82 & 171.4\\
-32 & 128 & 76 & 255.5\\
+32 & 128 & 86 & 255.5\\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Luckily, the Haorui-Net performs better than ResNet its best at 24 epochs, 128 batch size and reaches 82 true positive. This model was saved as  '24-epoch-128bz-MODIFIED-TEST82ACC.pb'.
+Luckily, the Haorui-Net performs better than ResNet its best at 24 epochs, 128 batch size and reaches 82 true positive. This model was saved as  '32-epoch-128bz-MODIFIED-TEST86ACC.pb'.
 
-So I'm proud to announce that Haorui-Net becomes the winner in this combination, with two more ture-positive!
+So I'm proud to announce that Haorui-Net becomes the winner in this combination, with ten more ture-positive!
 
 But what I want to point out is that, Haorui-Net is weaker in the decrease of loss, for ResNet, the minimum of loss is about 0.27 while training, but for Haorui-Net, the minimum loss is about 3.8, it probably means ResNet is designed more smarter in track and reduce the loss.
 
@@ -402,17 +402,37 @@ mtcnn = MTCNN(image_size=160,
         thresholds=[0.6,0.7,0.7],
         factor=0.709,post_process=True,device=device)
 \end{lstlisting}
-And the test of Face-Recognize shows:
+I load the best model of Haorui-Net and the test of Face-Recognize shows:
 \begin{figure}[H]%H为当前位置，!htb为忽略美学标准，htbp为浮动图形
   \centering
   \caption{Face Recognize Test}
 %可选参数中width=\columnwidth选取了当前列宽
-  \includegraphics[width=50ex]{IMG/人脸识别测试.png} %插入图片，[]中设置图片大小，{}中是图片文件名
+  \includegraphics[width=50ex]{IMG/新人脸识别测试.png} %插入图片，[]中设置图片大小，{}中是图片文件名
   \label{Fig.RNN} %用于文内引用的标签
 \end{figure}
-It takes about 0.3653 second per student for face recognize and the accuracy is 78.8$\%$ for the best model of "Haorui Net", not so bad.
+It takes about 0.46 second per student for face recognize and the accuracy is 82.7$\%$ for the best model of "Haorui Net", not so bad.
+
+But this result is slower than ResNet:
+\begin{figure}[H]%H为当前位置，!htb为忽略美学标准，htbp为浮动图形
+  \centering
+  \caption{Face Recognize Test}
+%可选参数中width=\columnwidth选取了当前列宽
+  \includegraphics[width=50ex]{IMG/人脸识别测试2.png} %插入图片，[]中设置图片大小，{}中是图片文件名
+  \label{Fig.RNN} %用于文内引用的标签
+\end{figure}
 
 
+
+For Face-Verification, I find that it takes too long to run the function because it have to check all the faces, so I just check the first 40 faces and get the results below:
+\begin{figure}[H]%H为当前位置，!htb为忽略美学标准，htbp为浮动图形
+  \centering
+  \caption{Face Verification Test}
+%可选参数中width=\columnwidth选取了当前列宽
+  \includegraphics[width=40ex]{IMG/人脸认证.png} %插入图片，[]中设置图片大小，{}中是图片文件名
+  \label{Fig.RNN} %用于文内引用的标签
+\end{figure}
+
+In conclusion, I test the Resnet and hand-modified Haorui-Net, all based on pretrained weights, finally Haorui-Net win the competition in accuracy. I use Adam optimizer because it performs best in minimising loss. For the best model, it takes about 0.46 second per student for face recognize and the accuracy is 82.7 $\%$.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
