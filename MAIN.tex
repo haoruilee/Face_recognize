@@ -110,7 +110,7 @@
 \maketitle
 
 \begin{abstract}
-For face recognition, first, I use MTCNN and face.evoLVe for automatic data cleansing, then rename the folders by batch processing in order to fit the requirenments of Dataset.ImageFolder. Third, I trained two modles for face recognition, one is self-modified Resnet, another is InceptionResNetV1 with pre-trained weight, and finetuning the modle on classmates' data. Finally the best cross-entropy loss is 0.1830 and recognize 82/104 classmates.  
+For face recognition, first, I use MTCNN and face.evoLVe for automatic data cleansing and change parameters in MTCNN to avoid dirty data. Then I trained two models, one is self-modified Resnet called Haorui-Net which use Cov2d layers in ResNet for fracture extraction and use pooling and softmax layers to do classifications, another is InceptionResNetV1 with pre-trained weight, and fine-tuning the model on classmates' data. Finally the best model recognizes 86/104 classmates in 48s. During the training process, I compare several different optimizers and combination of batch and epoch and use the best one.
 \end{abstract}
 
 \section{Data prepare}
@@ -126,7 +126,7 @@ exploits the inherent correlation between them to boost up Resnet's performance 
   \includegraphics[width=\columnwidth]{IMG/MTCNN.png} %插入图片，[]中设置图片大小，{}中是图片文件名
   \label{Fig.RNN} %用于文内引用的标签
 \end{figure}
-Though MTCNN is very fast, but it sometimes go wrong and bring in dirty data, like the Figure2, and these dirty data will definitely bring catastrophe for model trainning.
+But I find though MTCNN is very fast, but it sometimes go wrong and bring in dirty data, like the Figure2, and these dirty data will definitely bring catastrophe for model trainning.
 \begin{figure}[H]%H为当前位置，!htb为忽略美学标准，htbp为浮动图形
   \centering
   \caption{Samples of dirty data by MTCNN}
@@ -140,6 +140,9 @@ This tool can be find at:
   \url{https://github.com/ZhaoJ9014/face.evoLVe.PyTorch}
 \end{center}
 This tool is about 4-times slower than MTCNN, but brings no dirty data.
+
+But I am wandering why MTCNN get these wrong results, because it is almost at state-of-the-art. And the face.evoLVe tool is designed base on MTCNN. So I test several parameters, It shows that when the default minim-window-size is undefined, mtcnn starts from 10x10 and tends to get wrong faces. So after I set the minimum size at 40x40, all results are good. 
+
 \subsection{Rebuild folder architecture}
 For quick detect image labels, I use \textit{torchvision.datasets.ImageFolder} to automatically read classmates name. To use this function, I rebuild the data folder's architecture by code.
 
@@ -218,7 +221,7 @@ The code of final layers are:
         self.last_bn = nn.BatchNorm1d(512, eps=0.001, momentum=0.1, affine=True)
         self.logits = nn.Linear(512, tmp_classes)
 \end{lstlisting}
-And I have modified the final layers to test which model is best.
+And I will modified the final layers, then test which model is the best.
 
 \subsection{Modified ResNet}
 From the upper section we can see the final six layers are:
@@ -262,7 +265,7 @@ model_ft = nn.Sequential(*list(model_ft.children())[:-5])
 \end{lstlisting}
 Now, model modified is a torch model but without the final linear, pooling, batchnorm, and sigmoid layers.
 
-After this, I design another final layers calss includs Flatten and Normalize, the codes are:
+After this, I design another final layers class includes sample Flatten and Normalize layers in a gesture to use features extracted by Cov2d layers, the codes are:
 \begin{lstlisting}[language=Python, caption=Haorui Net]
 #Change the final layers as follows
 model_modified.avgpool_1a = nn.AdaptiveAvgPool2d(output_size=1)
@@ -284,7 +287,7 @@ So the architecture is:
   \label{Fig.RNN} %用于文内引用的标签
 \end{figure}
 
-We can name it Haorui-ResNet. In the next section I will train these two models and show some details to pick the winner.
+We can name it Haorui-Net. In the next section I will train these two models and show some details to pick the winner.
 
 \section{Training and preferences}
 After design the model, I begin the training step. Tried different epoch, batch size, learning rate and models.
@@ -305,7 +308,7 @@ Use '!nvidia-smi' I get the following in formations of GPU memeory, it shows tha
 \subsection{Should I use Adam?}
 Optimizer plays an important role in deep-learning, and different optimizer can have totally performance.
 
-As we all know, Adam is refereed as an excellent optimizer, but should I use it too in my work? So I test another theoretically-good optimizer which is called RMS-prop, and the results in Tensorborad-X are as follows:
+As we all know, "Adam" is honoured as an excellent optimizer, but should I use it too in my work? So I test another theoretically-good optimizer which is called RMS-prop, and the results in Tensorborad-X are as follows:
 \begin{figure}[H]%H为当前位置，!htb为忽略美学标准，htbp为浮动图形
   \centering
   \caption{Trainning loss of RMS in TensorboradX}
@@ -346,7 +349,7 @@ As its shown above, Adam optimizer performs better and I will use it in trainnin
 \subsection{Epochs and batch-size}
 After choose several combinations of epochs and batch size,  I get the results as follows on Inception-ResNet:
 
-\begin{table}[!htbp]
+\begin{table}[H]
 \centering
 \caption{Records of combination for ResNet}\label{tab:aStrangeTable}%添加标题 设置标签
 \begin{tabular}{cccc}
@@ -374,15 +377,18 @@ So finally, the ResNet performs its best at 24 epochs, 128 batch size and reache
 
 With the chart above, I can qiuckly choose some combinations for Haorui-Net, and the results are as follows:
 
-\begin{table}[!htbp]
+\begin{table}[H]
 \centering
 \caption{Records of combination for Haorui-Net}\label{tab:aStrangeTable}%添加标题 设置标签
 \begin{tabular}{cccc}
 \toprule
 Epochs & Batch size& TP &Train FPS\\
 \midrule
+24 & 64 & 71 & 153.9\\
 24 & 128 & 82 & 171.4\\
 32 & 128 & 86 & 255.5\\
+32 & 256 & 77 & 210.4\\
+64 & 256 & 77 & 195.7\\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -433,6 +439,15 @@ For Face-Verification, I find that it takes too long to run the function because
 \end{figure}
 
 In conclusion, I test the Resnet and hand-modified Haorui-Net, all based on pretrained weights, finally Haorui-Net win the competition in accuracy. I use Adam optimizer because it performs best in minimising loss. For the best model, it takes about 0.46 second per student for face recognize and the accuracy is 82.7 $\%$.
+
+\section{Expectations}
+Though my model get a good result in accuracy, but there still remains something I want to explore.
+
+For example, my face-verification function runs too slow to verified all pictures and names, I think it perhaps due to my  algorithm is O($n^2$) and I write too many works to move data between GPU and CPU which is time-consuming. And I think perhaps use B+ tree or some other data structure can speed up the searching process, also, keep all the data on one device can avoid moving them.
+
+Moreover, though my model works great on our classmate-dataset, but for actual industrial demand, sometimes the faces in picture is really small, slant, and only have side faces, like  surveillance videos. To recognize faces in these scenes, perhaps we have to made a 3D-model for faces[4], and use more skills to avoid overfitting like knowledge-distillation.[5]
+
+In conclusion, there are still large space to modify this work for specific context.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -450,6 +465,10 @@ In conclusion, I test the Resnet and hand-modified Haorui-Net, all based on pret
 
 [3]Szegedy, C., Ioffe, S., Vanhoucke, V. & Alemi, A. A. (2017). Inception-v4, Inception-ResNet and the Impact of Residual Connections on Learning. Proceedings of the 31st AAAI Conference on Artificial Intelligence (p./pp. 4278--4284), : AAAI Press.
 
+[4]Dou, P., Zhang, L., Wu, Y., Shah, S. K. & Kakadiaris, I. A. (2015). Pose-robust face signature for multi-view face recognition.. BTAS (p./pp. 1-8), : IEEE. ISBN: 978-1-4799-8776-4
+
+
+[5]Luo, P., Zhu, Z., Liu, Z., Wang, X. & Tang, X. (2016). Face Model Compression by Distilling Knowledge from Neurons.. In D. Schuurmans & M. P. Wellman (eds.), AAAI (p./pp. 3560-3566), : AAAI Press. ISBN: 978-1-57735-760-5
 
 
 
