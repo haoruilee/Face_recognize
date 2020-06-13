@@ -53,9 +53,9 @@
 \renewcommand{\sfdefault}{phv}
 
 % change this every year for notice string at bottom
-\newcommand{\@neuripsordinal}{34th}
-\newcommand{\@neuripsyear}{2020}
-\newcommand{\@neuripslocation}{Vancouver, Canada}
+\newcommand{\@neuripsordinal}{Machine}
+%\newcommand{\@neuripsyear}{Learning}
+%\newcommand{\@neuripslocation}{Experiment}
 
 % acknowledgments
 \usepackage{environ}
@@ -73,14 +73,12 @@
 \else
   \if@neuripsfinal
     \newcommand{\@noticestring}{%
-      \@neuripsordinal\/ Conference on Neural Information Processing Systems
-      (NeurIPS \@neuripsyear), \@neuripslocation.%
+       \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Machine Learning Experiment Report of Face Recognition%
     }
   \else
     \newcommand{\@noticestring}{%
-      Submitted to \@neuripsordinal\/ Conference on Neural Information
-      Processing Systems (NeurIPS \@neuripsyear). Do not distribute.%
-    }
+       \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \   Machine Learning Experiment Report of Face Recognition%
+          }
 
     % hide the acknowledgements
     \NewEnviron{hide}{}

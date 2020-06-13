@@ -110,7 +110,7 @@
 \maketitle
 
 \begin{abstract}
-For face recognition, first, I use MTCNN and face.evoLVe for automatic data cleansing and change parameters in MTCNN to avoid dirty data. Then I trained two models, one is self-modified Resnet called Haorui-Net which use Cov2d layers in ResNet for fracture extraction and use pooling and softmax layers to do classifications, another is InceptionResNetV1 with pre-trained weight, and fine-tuning the model on classmates' data. Finally the best model recognizes 86/104 classmates in 48s. During the training process, I compare several different optimizers and combination of batch and epoch and use the best one.
+For face recognition, first, I use MTCNN and face.evoLVe for automatic data cleansing and change parameters in MTCNN to avoid dirty data. Then I trained two models, one is self-modified Resnet called Haorui-Net which use Cov2d layers in ResNet for fracture extraction and use pooling and softmax layers to do classifications, another is InceptionResNetV1 with pre-trained weight, and fine-tuning the model on classmates' data. During the training process, I compare several different optimizers and combination of batch and epoch and use the best one. Finally the best model recognizes 86/104 classmates in 48s and it is Haorui-Net. At last, when it comes to why my model is better than ResNet, perhaps it is due to deeper network need more data size and my Haorui-Net is simpler so it can get its best with small data.
 \end{abstract}
 
 \section{Data prepare}
@@ -196,10 +196,10 @@ Finally I choose all these transforms to improve the model's robustness. And the
 Due to the fact that the data we have is small scale, it will be hard to train a model without over-fitting. So I think it is recognized to use some pre-trained model and do the fine-tuning.  What I have to do is design the final layers.
 
 \subsection{Pre-trained ResNet}
-The pre-trained weight I download is the Facenet trained by Google. They use triple loss and finally get 0.997 accuracy at Lwf, the High-Level modal structure of Facenet is as follow[2]:
+The pre-trained weight I download is the Facenet trained by Google. They use triple loss and finally get 0.997 accuracy at Lwf, the High-Level model structure of Facenet is as follow[2]:
 \begin{figure}[H]%H为当前位置，!htb为忽略美学标准，htbp为浮动图形
   \centering
-  \caption{High Level Modal Structure of Facenet}
+  \caption{High Level Model Structure of Facenet}
 %可选参数中width=\columnwidth选取了当前列宽
   \includegraphics[width=\columnwidth]{IMG/facenet.png} %插入图片，[]中设置图片大小，{}中是图片文件名
   \label{Fig.RNN} %用于文内引用的标签
@@ -289,7 +289,7 @@ So the architecture is:
 
 We can name it Haorui-Net. In the next section I will train these two models and show some details to pick the winner.
 
-\section{Training and preferences}
+\section{Training and select parameters}
 After design the model, I begin the training step. Tried different epoch, batch size, learning rate and models.
 
 \subsection{Check GPU Memory}
@@ -439,6 +439,8 @@ For Face-Verification, I find that it takes too long to run the function because
 \end{figure}
 
 In conclusion, I test the Resnet and hand-modified Haorui-Net, all based on pretrained weights, finally Haorui-Net win the competition in accuracy. I use Adam optimizer because it performs best in minimising loss. For the best model, it takes about 0.46 second per student for face recognize and the accuracy is 82.7 $\%$.
+
+Why my model can performers better than this champion model? (though the resnet model in paper get 99.5$\%$ accuracy and only 76$\%$ in my work) I think perhaps it because our database is small and only need to classify 104 people, when the neuronal network is more and more deep, it needs more data to get its best accuracy, and my Haorui-Net is simpler, which means with small data it is more easy to be trained at its best. Last but not least, the gap between these two model is small, with more experiment of combination of epochs and batchsize, perhaps ResNet can give better results.
 
 \section{Expectations}
 Though my model get a good result in accuracy, but there still remains something I want to explore.
